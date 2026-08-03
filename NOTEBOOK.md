@@ -154,6 +154,8 @@ I think using tokens per parallel sentence relative to English is a much cleaner
 
 ## #8 Part B: capacity model
 
+The formulae I used were from Google. Had to calculate by hand first to verify if they actually are real or if AI is hallucinating again.
+
 Calculated KV capacity from the hardware assumptions:
 
 24 × 0.92 GB
@@ -164,7 +166,7 @@ Calculated KV capacity from the hardware assumptions:
 
 Using 114,688 bytes/token (28 layers × 2 × 8 KV heads × 128 × 2 bytes), a 4096-token sequence needs about 0.47 GB.
 
-That predicts roughly 25 concurrent sequences.
+Almost 25 sequences.
 
 The nice surprise was that the predicted KV utilization matches the logged `kv_cache_util` almost perfectly before saturation (0.16, 0.31, 0.62, 0.93).
 
