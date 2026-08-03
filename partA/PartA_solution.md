@@ -14,7 +14,7 @@ Languages: English, Hindi, Kannada, Tamil & Telugu
 (eng_Latn, hin_Deva, kan_Knda, tam_Taml, tel_Telu)
 
 **What the corpus cannot tell us:**
-1. The 977 sentences from Wikipedia's news/health/travel text is okay for relative tokenizer comparison, not for our traffic. Real user chats are short and sometimes ambiguous, with mix in 2 languages (Hinglish or Tanglish) and every tokenizer handles it differently. This corpus hasn't sampled it.
+1. The 997 sentences from Wikipedia's news/health/travel text is okay for relative tokenizer comparison, not for our traffic. Real user chats are short and sometimes ambiguous, with mix in 2 languages (Hinglish or Tanglish) and every tokenizer handles it differently. This corpus hasn't sampled it.
    
 2. It also cannot tell us about the downstream quality, the tokenizer being cheap for every sentence does not mean it can't harm the model.
 
@@ -46,7 +46,7 @@ Also, it was found that the line `random.seed(1337)` isn't useful, it does nothi
 ## A3: Corrected Analysis, using `analyze.py`
 
 The corrected analysis applies the following fixes:
-1. Removing the lowercasing of tokens
+1. Removing the lowercasing `.lower()` of tokens as it distorts cased languages, a no-op for Hindi
 2. using the correct `split()` for words splitting
 3. Using Aggregate Ratios
 4. **Using 4 denominators**: whitespace word, grapheme cluster, parallel sentence, UTF-8 byte
@@ -100,7 +100,7 @@ Why not others:
 
 - The whitespace "word" is different unit of meaning in Tamil as compared to English (E6)
   
-- Graphene cluster is unit of script, for single characters made with 1 or more letters. (base letter + diacritic)
+- Grapheme cluster is unit of script, for single characters made with 1 or more letters. (base letter + diacritic)
   
 - UTF-8 byte is only a unit of encoding. The Indic scripts are 3 Byte/char, therefore tok/byte  makes it look nice under xlmr (0.49x)
 
