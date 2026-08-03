@@ -29,11 +29,11 @@ from starter_kit.starter_kit.fertility import load_tokenizer, read_lines
 sys.stdout.reconfigure(encoding="utf-8")
 
 FLORES = {
-    "eng": "corpus_flores/eng_Latn.dev",
-    "hin": "corpus_flores/hin_Deva.dev",
-    "kan": "corpus_flores/kan_Knda.dev",
-    "tam": "corpus_flores/tam_Taml.dev",
-    "tel": "corpus_flores/tel_Telu.dev",
+    "eng": "partA/corpus_flores/eng_Latn.dev",
+    "hin": "partA/corpus_flores/hin_Deva.dev",
+    "kan": "partA/corpus_flores/kan_Knda.dev",
+    "tam": "partA/corpus_flores/tam_Taml.dev",
+    "tel": "partA/corpus_flores/tel_Telu.dev",
 }
 TOKENIZERS = [("gpt2", "gpt2"), ("xlmr", "hf:xlm-roberta-base")]
 
