@@ -112,3 +112,7 @@ On a multilingual tokenizer:
 - Hindi costs 1.26x more than English per unit of content
   
 - Dravidian Languages cost ~ 1.3 to 1.4x (NOT 6x)
+
+
+## A4: Recommendation memo
+Please refer to the `A4_memo.md` file.
