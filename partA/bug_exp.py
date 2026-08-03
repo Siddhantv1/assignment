@@ -4,6 +4,8 @@
 """
 running 1 experiment per flaw i claim.
 
+The numbers are printed before and after when running each experiment
+
 
 Claims under test:
   E1  line.split(" ") counts empty strings as words on double spaces (BUG)
