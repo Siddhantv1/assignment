@@ -30,7 +30,7 @@ print("=" * 72)
 kv_per_tok = LAYERS * 2 * KV_HEADS * HEAD_DIM * BYTES_FP16
 print(f"layers*2(K,V)*kv_heads*head_dim*2B = 28*2*8*128*2 = {kv_per_tok:,} B"
       f" = {kv_per_tok / 1024:.0f} KiB/token")
-print("(note: 8 KV heads, not 24 Q heads -- GQA is what makes this cheap)")
+print("(note: GQA makes this cheap, hence 8 KV heads and not 24 Q heads)")
 
 print()
 print("=" * 72)
