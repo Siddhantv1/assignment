@@ -113,7 +113,7 @@ Therfore: keep normalization. The effect is tiny, but it's doing the right thing
 
 ## #6 Tokenizer choice (E5)
 
-haha This is big.
+A big discovery!
 
 Ran the same FLORES corpus through GPT-2 and XLM-R.
 
