@@ -1,7 +1,7 @@
 # Part A: Tokenizer Audit results
 
 ## A1: The eval Corpus building
-I have used the FLORES 200 dev split corpus, which has the 977 parallel sentences per language. 
+I have used the FLORES 200 dev split corpus, which has the 997 parallel sentences per language. 
 
 Source:
  [The official NLLB dist](https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz)
