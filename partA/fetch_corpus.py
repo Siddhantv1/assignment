@@ -2,6 +2,14 @@
 """
 Languages: English, Hindi, Kannada, Tamil, Telugu
 
+
+Preprocessing phase:
+when analize script runs, empty lines get skipped. 
+
+all the files are listed in parallel, helping us use the
+"tokens per parallel sentence" as the denominator in analysis.
+
+
 """
 
 
