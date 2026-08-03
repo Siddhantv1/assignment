@@ -1,6 +1,7 @@
 # Part B: Capacity reconcilation
 
-For the B1 calculations, the script `capacity.py` was used.
+For the B1 calculations, the script `capacity.py` was used,
+whose results are stored in `capacity_results.txt`.
 
 ## B1 (a) Calculate exact KV-cache bytes per token
 To calculate this we would use the bytes per token formula for tokenizers:
@@ -100,3 +101,57 @@ The latency columns confirm it: ttft_ms_p50 jumps 500 → 637 → 955 ms (reques
 Fix : enable fp8 KV cache. Halving KV bytes/token (114,688 → 57,344 B) doubles capacity to ~51 concurrent 4096-token sequences, so batch 32 and 48 fit with zero preemption. Predicted effect: preemptions 7/23 → 0; reported throughput at batch 32 returns to the pre-saturation trend (~1800–1900 tok/s vs the observed 1384; the batch-16→24 increment was +296 tok/s); e2e_ms_p95 back under ~75 s (vs 97.5 s). Cheaper alternative with the same mechanism: cap max_num_seqs at 24 and queue the excess — throughput then stays at the batch-24 level (~1600 reported) instead of degrading, at the cost of queuing latency for the overflow wave.
 
 
+
+## B3 What is the misread column, & what is the honest "goodput" of the batch-24 long-prompt row (derive it from the log — there are two independent ways), and what should the report have said?
+
+**The misread column is `reported_tok_s`.** It does not count generated
+(output) tokens — it counts **all processed tokens, prompt prefill included**.
+Proof: `num_requests × (prompt_len + gen_len) / wall_clock_s` reproduces
+`reported_tok_s` to within rounding for **all 13 rows** (e.g. batch 16 short:
+16×768/13.91 = 883.4 ≈ 883.2; batch 16 long: 16×4096/49.97 = 1311.5 ≈ 1311.4).
+
+
+Both of the report's Section-2 conclusions follow from that one misreading:
+
+1. "Long prompts give better throughput (1311 vs 883 tok/s)." Comparing those
+   two rows, 88% of the long row's "throughput" is prefill of the 3584-token
+   prompts — work done once, not useful output. Honest output-token goodput
+   says the **opposite**: batch-16 short = 16×256/13.91 = **294.5 tok/s**
+   vs batch-16 long = 16×512/49.97 = **163.9 tok/s**. Longer prompts make
+   decode *slower* (each decode step must read a larger KV cache — decode is
+   memory-bandwidth-bound), so goodput per request falls.
+2. "Batch 48 will deliver ~3200 tok/s." Linear extrapolation of an inflated
+   metric, straight into the KV-capacity wall found in B2: at batch 48 the
+   observed value is 1298.5 tok/s (and only 162.3 tok/s of honest goodput),
+   because 23 of 48 sequences were preempted.
+
+
+   ### the 2 independent ways for honest goodput of batch 24 long prompt row
+
+   
+- Way 1 (from totals): `24 × 512 / 61.16 s` = **200.9 output tok/s**.
+- Way 2 (from per-token latency): `24 × 1000 / itl_ms_p50` = 24 × 1000/96.07
+  = **249.8 output tok/s** during steady-state decode.
+
+The ~20% gap between the two is exactly the prefill+scheduling share of the
+wall clock (24 × 3584 prompt tokens ≈ 86k tokens of prefill inside the 61.2 s).
+Way 1 is the number to quote for capacity planning; way 2 confirms no hidden
+preemption at this batch (`preempted_seqs` = 0, so both methods are clean).
+
+
+### what report should have said
+At batch 24 with 3584-token prompts the server delivers ~200 output tokens/s (≈250 tok/s in steady-state decode), KV
+cache is 93% full, and we are one batch step away from preemption. Do not extrapolate past this point; short-prompt traffic yields higher output-token throughput (~295 tok/s at batch 16) than long-prompt traffic.
+
+
+## B4 The metric to confirm the B2 mechanism
+
+Pull the **scheduler preemption counter** (in vLLM: `vllm:num_preemptions_total`;
+it is already visible in this harness as `preempted_seqs`). If the B2 mechanism
+is KV-exhaustion preemption, this counter must be **exactly 0 for all runs up
+to batch 24 and jump > 0 precisely at the batch where throughput drops** —
+which is what the log shows (0,0,0,0 → 7 → 23, tracking the 1607 → 1384 → 1298
+decline). A complementary reading is peak KV-block usage sitting at ~0.97 (the
+practical ceiling) on exactly those same rows. If instead throughput had fallen
+with zero preemptions and low KV utilization, the mechanism would be compute
+saturation, and the fix would be different (chunked prefill, not more KV space).
